@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Pusher-Geo-Tweets</title>
+  <script src="https://js.pusher.com/3.1/pusher.min.js"></script>
+  <style>
+    html, body {
+      width: 100%;
+      margin:0;
+    }
+    #hash {
+      text-align: center;
+    }
+    #tweets {
+      text-align:center;
+      margin:10px auto;
+      padding:10px;
+      border:1px solid #294E80;
+      width:500px;
+      border-radius: 10px;
+    }
+    .tweet {
+      border-bottom: 1px solid #294E80;
+      margin-bottom: 5px;
+    }
+    #tweets>div:last-of-type {
+      display:none;
+    }
+    #tweets>div:first-of-type {
+      display:block !important;
+    }
+  </style>
+</head>
+<body>
+  <h1 id="hash"></h1>
+  <div id="tweets">
+    <div>No tweets yet</div>
+  </div>
+
+  <script>
+    var pusher = new Pusher('e83407adb89c0c6b183a', {
+      cluster: 'eu',
+      encrypted: true
+    });
+
+    var tweetContainer = document.getElementById('tweets');
+    var hash = window.location.search.substring(1) || 'gcpn';
+    document.getElementById('hash').innerText = hash;
+
+    function buildTweet(data) {
+      var element = document.createElement('div');
+      element.classList.add('tweet');
+      element.classList.add('show');
+      element.innerHTML = `
+        <div><b>${data.user.screen_name}</b> - <small>${data.created_at}</small></div>
+        <p>${data.text}</p>
+      `;
+      return element;
+    }
+
+    var channel = pusher.subscribe(hash);
+    channel.bind('tweet', function(data) {
+      tweetContainer.insertBefore(buildTweet(data), tweetContainer.firstChild);
+    });
+  </script>
+</body>
+</html>
