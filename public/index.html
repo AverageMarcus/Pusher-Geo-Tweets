@@ -6,6 +6,9 @@
   <title>Pusher-Geo-Tweets</title>
   <script src="https://js.pusher.com/3.1/pusher.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.14.1/moment.min.js"></script>
+  <script src='https://api.mapbox.com/mapbox-gl-js/v0.21.0/mapbox-gl.js'></script>
+  <script src='/ngeohash.js'></script>
+  <link href='https://api.mapbox.com/mapbox-gl-js/v0.21.0/mapbox-gl.css' rel='stylesheet' />
   <style>
     html, body {
       width: 100%;
@@ -25,6 +28,11 @@
     .tweet {
       border-bottom: 1px solid #294E80;
       margin-bottom: 5px;
+      clear: both;
+    }
+    .tweet::before, .tweet::after {
+      clear:both;
+      content:'';
     }
     #tweets>div:last-of-type {
       display:none;
@@ -32,10 +40,17 @@
     #tweets>div:first-of-type {
       display:block !important;
     }
+
+    #map {
+      height: 200px;
+      width: 500px;
+      margin: 0 auto;
+    }
   </style>
 </head>
 <body>
   <h1 id="hash"></h1>
+  <div id="map"></div>
   <div id="tweets">
     <div>No tweets yet</div>
   </div>
@@ -67,6 +82,35 @@
     var channel = pusher.subscribe(hash);
     channel.bind('tweet', function(data) {
       tweetContainer.insertBefore(buildTweet(data), tweetContainer.firstChild);
+    });
+  </script>
+
+  <script>
+    var decodedHash = ngeohash.decode(hash);
+    mapboxgl.accessToken = 'pk.eyJ1IjoiYXZlcmFnZW1hcmN1cyIsImEiOiJjaXF0cnAzYnkwMDJlaHRuaW1iZnpreWlrIn0.ODKOblfwl3UE0rWzasZsiw';
+    var map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v9',
+        center: [decodedHash.longitude,decodedHash.latitude],
+        zoom: 10,
+        doubleClickZoom: false
+    });
+
+    map.on('dblclick', function(event) {
+      var newHash = ngeohash.encode(event.lngLat.lat, event.lngLat.lng, 4);
+      if(hash !== newHash) {
+        pusher.unsubscribe(hash);
+        document.getElementById('hash').innerText = hash;
+        pusher.subscribe(hash).bind('tweet', function(data) {
+          tweetContainer.insertBefore(buildTweet(data), tweetContainer.firstChild);
+        });
+        if (history.pushState) {
+          var newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?' + hash;
+          window.history.pushState({path:newurl},'',newurl);
+        } else {
+          window.location.search = hash;
+        }
+      }
     });
   </script>
 </body>
