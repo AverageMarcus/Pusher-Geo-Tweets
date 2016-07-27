@@ -18,7 +18,7 @@ const twitter = new Twitter({
   access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
 });
 // Currently limiting to England
-const gbStream = twitter.stream('statuses/filter', {locations: '-7.28,50.26,1.76,58.95'});
+const stream = twitter.stream('statuses/filter', {locations: '174.375,-84.9283209295,-163.125,85.6220685934'});
 
 let channels = new Set();
 
@@ -76,7 +76,7 @@ server.start((err) => {
     throw err;
   }
 
-  gbStream.on('data', function(tweet) {
+  stream.on('data', function(tweet) {
     if(tweet.geo) {
       let hash = ngeohash.encode(tweet.geo.coordinates[0], tweet.geo.coordinates[1], 4);
       if(channels.has(hash)) {
