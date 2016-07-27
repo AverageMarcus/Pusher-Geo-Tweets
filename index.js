@@ -18,7 +18,7 @@ const twitter = new Twitter({
   access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
 });
 // Currently limiting to England
-const stream = twitter.stream('statuses/filter', {locations: '174.375,-84.9283209295,-163.125,85.6220685934'});
+const stream = twitter.stream('statuses/filter', {locations: '-180,-90,180,90'});
 
 let channels = new Set();
 
