@@ -7,6 +7,7 @@
   <script src="https://js.pusher.com/3.1/pusher.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.14.1/moment.min.js"></script>
   <script src='https://api.mapbox.com/mapbox-gl-js/v0.21.0/mapbox-gl.js'></script>
+  <script src="https://platform.twitter.com/widgets.js"></script>
   <script src='/ngeohash.js'></script>
   <link href='https://api.mapbox.com/mapbox-gl-js/v0.21.0/mapbox-gl.css' rel='stylesheet' />
   <style>
@@ -66,24 +67,16 @@
     var hash = window.location.search.substring(1) || 'gcpn';
     document.getElementById('hash').innerText = hash;
 
-    function buildTweet(data) {
+    function handleTweet(data) {
       var element = document.createElement('div');
-      element.classList.add('tweet');
-      element.classList.add('show');
-      element.innerHTML = `
-        <div style="float:left;width:50px;margin-right:5px"><img src="${data.user.profile_image_url_https}"></div>
-        <div style="text-align:left">
-          <div><b>${data.user.name}</b> <span style="color:#ccc">@${data.user.screen_name}</span> - <small>${moment(data.created_at).format('DD MMM YYYY HH:mm')}</small></div>
-          <p style="margin:0">${data.text}</p>
-        </div>
-      `;
-      return element;
+      tweetContainer.insertBefore(element, tweetContainer.firstChild);
+      twttr.widgets.createTweet(data.id_str, element, {
+        conversation: 'none'
+      });
     }
 
     var channel = pusher.subscribe(hash);
-    channel.bind('tweet', function(data) {
-      tweetContainer.insertBefore(buildTweet(data), tweetContainer.firstChild);
-    });
+    channel.bind('tweet', handleTweet);
   </script>
 
   <script>
@@ -103,9 +96,7 @@
         pusher.unsubscribe(hash);
         hash = newHash;
         document.getElementById('hash').innerText = hash;
-        pusher.subscribe(hash).bind('tweet', function(data) {
-          tweetContainer.insertBefore(buildTweet(data), tweetContainer.firstChild);
-        });
+        pusher.subscribe(hash).bind('tweet', handleTweet);
         if (history.pushState) {
           var newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?' + hash;
           window.history.pushState({path:newurl},'',newurl);
