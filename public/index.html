@@ -101,6 +101,7 @@
       var newHash = ngeohash.encode(event.lngLat.lat, event.lngLat.lng, 4);
       if(hash !== newHash) {
         pusher.unsubscribe(hash);
+        hash = newHash;
         document.getElementById('hash').innerText = hash;
         pusher.subscribe(hash).bind('tweet', function(data) {
           tweetContainer.insertBefore(buildTweet(data), tweetContainer.firstChild);
