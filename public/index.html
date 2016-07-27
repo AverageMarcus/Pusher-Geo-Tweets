@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width">
   <title>Pusher-Geo-Tweets</title>
   <script src="https://js.pusher.com/3.1/pusher.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.14.1/moment.min.js"></script>
   <style>
     html, body {
       width: 100%;
@@ -54,8 +55,11 @@
       element.classList.add('tweet');
       element.classList.add('show');
       element.innerHTML = `
-        <div><b>${data.user.screen_name}</b> - <small>${data.created_at}</small></div>
-        <p>${data.text}</p>
+        <div style="float:left;width:50px;margin-right:5px"><img src="${data.user.profile_image_url_https}"></div>
+        <div style="text-align:left">
+          <div><b>${data.user.name}</b> <span style="color:#ccc">@${data.user.screen_name}</span> - <small>${moment(data.created_at).format('DD MMM YYYY HH:mm')}</small></div>
+          <p style="margin:0">${data.text}</p>
+        </div>
       `;
       return element;
     }
